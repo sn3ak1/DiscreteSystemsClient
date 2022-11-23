@@ -21,6 +21,8 @@ import android.bluetooth.BluetoothManager
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.example.bluetoothadvertisements.databinding.ActivityMainBinding
 
@@ -41,12 +43,15 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             verifyBluetoothCapabilities()
         }
+
+        findViewById<Button>(R.id.button).setOnClickListener {
+            val bluetoothAdapter = (getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter
+            bluetoothAdapter.name = findViewById<EditText>(R.id.editTextTextPersonName).text.toString()
+        }
     }
 
     private fun verifyBluetoothCapabilities() {
         val bluetoothAdapter = (getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter
-
-        bluetoothAdapter.name = "gosia"
 
         when {
             bluetoothAdapter == null ->
@@ -80,13 +85,11 @@ class MainActivity : AppCompatActivity() {
      */
     private fun setupFragments() {
         val fragTransaction = supportFragmentManager.beginTransaction()
-        fragTransaction.replace(R.id.scanner_fragment_container, ScannerFragment())
         fragTransaction.replace(R.id.advertiser_fragment_container, AdvertiserFragment())
         fragTransaction.commit()
     }
 
     private fun showErrorText(msg: String) {
-        binding.errorText.text = msg
         Log.d(TAG, "showErrorText: $msg")
     }
 }

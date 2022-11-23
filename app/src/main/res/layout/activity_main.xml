@@ -24,29 +24,27 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <FrameLayout
-        android:id="@+id/scanner_fragment_container"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/dummy"
+        android:text="Change name"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="spread_inside">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/error_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:freezesText="true" />
-    </FrameLayout>
-
-    <View
-        android:id="@+id/dummy"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/std_margin"
-        app:layout_constraintBottom_toTopOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/scanner_fragment_container" />
+    <EditText
+        android:id="@+id/editTextTextPersonName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Name"
+        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
@@ -54,8 +52,7 @@
         android:layout_height="0dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@+id/advertiser_fragment_container"
-        app:layout_constraintGuide_percent="0.80"
-        app:layout_constraintTop_toBottomOf="@+id/scanner_fragment_container" />
+        app:layout_constraintGuide_percent="0.80" />
 
     <FrameLayout
         android:id="@+id/advertiser_fragment_container"
@@ -65,6 +62,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/guideline" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 
 

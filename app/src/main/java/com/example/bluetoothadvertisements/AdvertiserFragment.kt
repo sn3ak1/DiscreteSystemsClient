@@ -16,6 +16,8 @@
 
 package com.example.bluetoothadvertisements
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.bluetooth.le.AdvertiseCallback
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -28,6 +30,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import com.example.bluetoothadvertisements.databinding.FragmentAdvertiserBinding
 import com.example.bluetoothadvertisements.service.AdvertiserService
@@ -62,6 +65,7 @@ class AdvertiserFragment : Fragment() {
                 Toast.makeText(requireContext(), errMsg, Toast.LENGTH_LONG).show()
             }
         }
+
     }
 
     override fun onCreateView(
@@ -101,8 +105,7 @@ class AdvertiserFragment : Fragment() {
         binding.advertiseSwitch.isChecked = false
     }
 
-    private fun createAdvertisingServiceIntent(): Intent =
-        Intent(requireContext(), AdvertiserService::class.java)
+    private fun createAdvertisingServiceIntent(): Intent = Intent(requireContext(), AdvertiserService::class.java)
 }
 
 
