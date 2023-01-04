@@ -83,7 +83,7 @@ class ScannerFragment : Fragment() {
         if (isLocationPermissionRequired && isLocationAccessNotGranted) {
             requestLocationPermission()
         } else {
-            startScanning()
+//            startScanning()
         }
     }
 
@@ -115,7 +115,7 @@ class ScannerFragment : Fragment() {
         when (requestCode) {
             PERMISSION_REQUEST_LOCATION -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    startScanning()
+//                    startScanning()
                 }
             }
             else -> Toast.makeText(
@@ -143,26 +143,26 @@ class ScannerFragment : Fragment() {
         }
     }
 
-    private fun startScanning() {
-        Log.d(TAG, "startScanning")
+//    private fun startScanning() {
+//        Log.d(TAG, "startScanning")
+//
+//        if (scanCallback != null) {
+//            Log.d(TAG, "startScanning: already scanning")
+//            Toast.makeText(requireContext(), getString(R.string.bt_scanning), Toast.LENGTH_LONG).show()
+//            return
+//        }
+//        handler?.postDelayed({ stopScanning() }, SCAN_PERIOD_IN_MILLIS)
+//        scanCallback = SampleScanCallback()
+//        bluetoothLeScanner?.startScan(buildScanFilters(), buildScanSettings(), scanCallback)
+//    }
 
-        if (scanCallback != null) {
-            Log.d(TAG, "startScanning: already scanning")
-            Toast.makeText(requireContext(), getString(R.string.bt_scanning), Toast.LENGTH_LONG).show()
-            return
-        }
-        handler?.postDelayed({ stopScanning() }, SCAN_PERIOD_IN_MILLIS)
-        scanCallback = SampleScanCallback()
-        bluetoothLeScanner?.startScan(buildScanFilters(), buildScanSettings(), scanCallback)
-    }
-
-    private fun stopScanning() {
-        Log.d(TAG, "stopScanning")
-        bluetoothLeScanner?.stopScan(scanCallback)
-        scanCallback = null
-        // update 'last seen' times even though there are no new results
-        scannerAdapter.notifyDataSetChanged()
-    }
+//    private fun stopScanning() {
+//        Log.d(TAG, "stopScanning")
+//        bluetoothLeScanner?.stopScan(scanCallback)
+//        scanCallback = null
+//        // update 'last seen' times even though there are no new results
+//        scannerAdapter.notifyDataSetChanged()
+//    }
 
     private fun buildScanFilters(): List<ScanFilter> {
         val scanFilter = ScanFilter.Builder()
@@ -180,15 +180,15 @@ class ScannerFragment : Fragment() {
         inflater.inflate(R.menu.scanner_menu, menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.refresh -> {
-                startScanning()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        return when (item.itemId) {
+//            R.id.refresh -> {
+//                startScanning()
+//                true
+//            }
+//            else -> super.onOptionsItemSelected(item)
+//        }
+//    }
 
     inner class SampleScanCallback : ScanCallback() {
 
@@ -201,7 +201,7 @@ class ScannerFragment : Fragment() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             Log.d(TAG, "onScanResult: single")
-            scannerAdapter.addSingleItem(result)
+//            scannerAdapter.addSingleItem(result)
         }
 
         override fun onScanFailed(errorCode: Int) {

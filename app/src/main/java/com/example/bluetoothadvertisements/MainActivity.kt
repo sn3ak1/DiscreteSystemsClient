@@ -16,16 +16,27 @@
 
 package com.example.bluetoothadvertisements
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.bluetoothadvertisements.databinding.ActivityMainBinding
-
+//import com.example.bluetoothadvertisements.databinding.ActivityMainBinding
+import com.google.android.gms.location.*
+import com.google.firebase.ktx.Firebase
+import com.google.android.gms.location.LocationRequest.create
+import com.google.firebase.firestore.ktx.firestore
 private const val TAG = "MainActivity"
 
 /**
@@ -35,10 +46,101 @@ private const val TAG = "MainActivity"
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+private lateinit var fusedLocationClient: FusedLocationProviderClient
+private lateinit var locationCallback: LocationCallback
+
+    private fun startLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        fusedLocationClient.requestLocationUpdates(
+            LocationRequest().apply {
+                interval = 10000
+                fastestInterval = 5000
+                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            },
+            locationCallback,
+            Looper.getMainLooper()
+        )
+    }
+
+    private fun checkPermissions() {
+        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        if (!bluetoothAdapter.isEnabled) {
+            Toast.makeText(this, "nie dziala", Toast.LENGTH_LONG).show()
+            return
+        }
+        val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        val permissionDeniedList: MutableList<String> = ArrayList()
+        for (permission in permissions) {
+            val permissionCheck = ContextCompat.checkSelfPermission(this, permission)
+            if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+//                onPermissionGranted(permission)
+            } else {
+                permissionDeniedList.add(permission)
+            }
+        }
+        if (permissionDeniedList.isNotEmpty()) {
+            val deniedPermissions = permissionDeniedList.toTypedArray()
+            ActivityCompat.requestPermissions(
+                this,
+                deniedPermissions,
+                2
+            )
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        //setContentView
+        setContentView( binding.root )
+
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            checkPermissions()
+        }
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                locationResult ?: return
+                for (location in locationResult.locations){
+                    val currTime: Long = System.currentTimeMillis()
+
+                    val bluetoothInstance = hashMapOf(
+                        "time" to currTime.toString(),
+                        "y" to location.latitude.toString(),
+                        "x" to location.longitude.toString(),
+                        "gps" to true
+                    )
+                    val name = findViewById<EditText>(R.id.editTextTextPersonName).text.toString()
+                    val db = Firebase.firestore
+                    db.collection(  name +" | " + (currTime / 3600000).toInt().toString())
+                        .document(currTime.toString()).
+                        set(bluetoothInstance)
+
+                    Log.d("aaaaaa", "onLocationResult: ${location.latitude} ${location.longitude}")
+//
+                }
+            }
+
+        }
+
+        startLocationUpdates()
 
         if (savedInstanceState == null) {
             verifyBluetoothCapabilities()
@@ -53,6 +155,20 @@ class MainActivity : AppCompatActivity() {
     private fun verifyBluetoothCapabilities() {
         val bluetoothAdapter = (getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter
 
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
         when {
             bluetoothAdapter == null ->
                 // Bluetooth is not supported on this hardware platform

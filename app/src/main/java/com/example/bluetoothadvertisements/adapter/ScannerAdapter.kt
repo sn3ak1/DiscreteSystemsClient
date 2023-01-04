@@ -16,10 +16,14 @@
 
 package com.example.bluetoothadvertisements.adapter
 
+import android.Manifest
 import android.bluetooth.le.ScanResult
+import android.content.Context
+import android.content.pm.PackageManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bluetoothadvertisements.databinding.VhScanResultBinding
 
@@ -39,19 +43,33 @@ class ScannerAdapter : RecyclerView.Adapter<ScannerAdapter.ScanResultVh>() {
         }
     }
 
-    fun addSingleItem(item: ScanResult) {
-        /**
-         * In this particular case the data coming in may be duplicate. So check that only unique
-         * elements are admitted: the device Id + device name should create a unique pair.
-         * removeIf requires API level 24, so using removeAll here. But feel free to use any of
-         * a number of options. Remove the previous element so to keep the latest timestamp
-         */
-        itemsList.removeAll {
-            it.device.name == item.device.name && it.device.address == item.device.address
-        }
-        itemsList.add(item)
-        notifyDataSetChanged()
-    }
+//    fun addSingleItem(item: ScanResult) {
+//        /**
+//         * In this particular case the data coming in may be duplicate. So check that only unique
+//         * elements are admitted: the device Id + device name should create a unique pair.
+//         * removeIf requires API level 24, so using removeAll here. But feel free to use any of
+//         * a number of options. Remove the previous element so to keep the latest timestamp
+//         */
+//        itemsList.removeAll {
+//            if (ActivityCompat.checkSelfPermission(
+//                        this,
+//                    Manifest.permission.BLUETOOTH_CONNECT
+//                ) != PackageManager.PERMISSION_GRANTED
+//            ) {
+//                // TODO: Consider calling
+//                //    ActivityCompat#requestPermissions
+//                // here to request the missing permissions, and then overriding
+//                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//                //                                          int[] grantResults)
+//                // to handle the case where the user grants the permission. See the documentation
+//                // for ActivityCompat#requestPermissions for more details.
+//                return
+//            }
+//            it.device.name == item.device.name && it.device.address == item.device.address
+//        }
+//        itemsList.add(item)
+//        notifyDataSetChanged()
+//    }
 
     override fun getItemCount() = itemsList.size
 
@@ -72,6 +90,20 @@ class ScannerAdapter : RecyclerView.Adapter<ScannerAdapter.ScanResultVh>() {
         RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ScanResult?) {
             item?.let {
+                if (ActivityCompat.checkSelfPermission(
+                         this.binding.root.context,
+                        Manifest.permission.BLUETOOTH_CONNECT
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return
+                }
                 binding.deviceName.text = it.device.name
                 binding.deviceAddress.text = it.device.address
                 binding.lastSeen.text = it.timestampNanos.toString()
