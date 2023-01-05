@@ -133,16 +133,29 @@ private lateinit var locationCallback: LocationCallback
                         "time" to currTime.toString(),
                         "y" to location.latitude.toString(),
                         "x" to location.longitude.toString(),
-                        "gps" to true
+//                        "gps" to true
                     )
 //                    val name = findViewById<EditText>(R.id.editTextTextPersonName).text.toString()
                     val db = Firebase.firestore
-                    db.collection(  name +" | " + (currTime / 3600000).toInt().toString())
+                    db.collection("Devices").document("GPS").collection(  name +" | " + (currTime / 3600000).toInt().toString())
                         .document(currTime.toString()).
                         set(bluetoothInstance)
+                    // get devices array from GPS document from Devices collection and add unique device name
+                    // if not already in array
+                    db.collection("Devices").document("GPS").get().addOnSuccessListener { document ->
+                        if (document != null) {                            Log.d(TAG, "DocumentSnapshot data: ${document.data}")
 
-                    Log.d("aaaaaa", "onLocationResult: ${location.latitude} ${location.longitude}")
-//
+                            val devices = document.get("devices") as ArrayList<String>
+                            if (!devices.contains(name)) {
+                                devices.add(name)
+                                db.collection("Devices").document("GPS").update("devices", devices)
+                            }
+                        } else {
+                            Log.d(TAG, "No such document")
+                        }
+                    }.addOnFailureListener { exception ->
+                        Log.d(TAG, "get failed with ", exception)
+                    }
                 }
             }
 
@@ -157,7 +170,6 @@ private lateinit var locationCallback: LocationCallback
             val bluetoothAdapter = (getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter
             bluetoothAdapter.name = findViewById<EditText>(R.id.editTextTextPersonName).text.toString()
             name = findViewById<EditText>(R.id.editTextTextPersonName).text.toString()
-
         }
     }
 
