@@ -137,7 +137,7 @@ private lateinit var locationCallback: LocationCallback
                     )
 //                    val name = findViewById<EditText>(R.id.editTextTextPersonName).text.toString()
                     val db = Firebase.firestore
-                    db.collection("Devices").document("GPS").collection(  name +" | " + (currTime / 3600000).toInt().toString())
+                    db.collection("Devices").document("GPS").collection(  name )
                         .document(currTime.toString()).
                         set(bluetoothInstance)
                     // get devices array from GPS document from Devices collection and add unique device name
