@@ -29,10 +29,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/broadcast_device"
+        android:textColor="#4E342E"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.59"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

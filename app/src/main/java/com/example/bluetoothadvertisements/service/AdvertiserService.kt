@@ -16,7 +16,9 @@
 
 package com.example.bluetoothadvertisements.service
 
+import android.annotation.SuppressLint
 import android.app.*
+import android.app.PendingIntent.FLAG_MUTABLE
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.AdvertiseCallback
@@ -87,12 +89,14 @@ class AdvertiserService : Service() {
         }
     }
 
+
+    @SuppressLint("MissingPermission")
     private fun stopAdvertising() = bluetoothLeAdvertiser?.stopAdvertising(advertiseCallback)
         .also { bluetoothLeAdvertiser = null }
 
     private fun goForeground() {
         val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, FLAG_MUTABLE)
         val nBuilder = when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
                 val bleNotificationChannel = NotificationChannel(

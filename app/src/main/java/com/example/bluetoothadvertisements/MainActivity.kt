@@ -44,7 +44,6 @@ private const val TAG = "MainActivity"
  * devices.
  */
 class MainActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityMainBinding
 private lateinit var fusedLocationClient: FusedLocationProviderClient
 private lateinit var locationCallback: LocationCallback
@@ -58,7 +57,7 @@ private lateinit var locationCallback: LocationCallback
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            return
+            checkPermissions()
         }
         fusedLocationClient.requestLocationUpdates(
             LocationRequest().apply {
@@ -77,12 +76,19 @@ private lateinit var locationCallback: LocationCallback
             Toast.makeText(this, "nie dziala", Toast.LENGTH_LONG).show()
             return
         }
-        val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+            Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS, Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.BLUETOOTH_ADVERTISE)
         val permissionDeniedList: MutableList<String> = ArrayList()
         for (permission in permissions) {
             val permissionCheck = ContextCompat.checkSelfPermission(this, permission)
             if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
 //                onPermissionGranted(permission)
+                Log.d(TAG, "Permission granted: $permission")
             } else {
                 permissionDeniedList.add(permission)
             }
@@ -99,8 +105,10 @@ private lateinit var locationCallback: LocationCallback
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        var name = "test"
         binding = ActivityMainBinding.inflate(layoutInflater)
         //setContentView
+
         setContentView( binding.root )
 
 
@@ -127,7 +135,7 @@ private lateinit var locationCallback: LocationCallback
                         "x" to location.longitude.toString(),
                         "gps" to true
                     )
-                    val name = findViewById<EditText>(R.id.editTextTextPersonName).text.toString()
+//                    val name = findViewById<EditText>(R.id.editTextTextPersonName).text.toString()
                     val db = Firebase.firestore
                     db.collection(  name +" | " + (currTime / 3600000).toInt().toString())
                         .document(currTime.toString()).
@@ -145,10 +153,11 @@ private lateinit var locationCallback: LocationCallback
         if (savedInstanceState == null) {
             verifyBluetoothCapabilities()
         }
-
         findViewById<Button>(R.id.button).setOnClickListener {
             val bluetoothAdapter = (getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter
             bluetoothAdapter.name = findViewById<EditText>(R.id.editTextTextPersonName).text.toString()
+            name = findViewById<EditText>(R.id.editTextTextPersonName).text.toString()
+
         }
     }
 
@@ -160,14 +169,7 @@ private lateinit var locationCallback: LocationCallback
                 Manifest.permission.BLUETOOTH_CONNECT
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
+            checkPermissions()
         }
         when {
             bluetoothAdapter == null ->
@@ -201,6 +203,7 @@ private lateinit var locationCallback: LocationCallback
      */
     private fun setupFragments() {
         val fragTransaction = supportFragmentManager.beginTransaction()
+        Log.d(TAG, "setupFragments: setting up fragments")
         fragTransaction.replace(R.id.advertiser_fragment_container, AdvertiserFragment())
         fragTransaction.commit()
     }

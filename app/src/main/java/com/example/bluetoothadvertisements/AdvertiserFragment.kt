@@ -51,6 +51,8 @@ class AdvertiserFragment : Fragment() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val errorCode = intent?.getIntExtra(BT_ADVERTISING_FAILED_EXTRA_CODE, INVALID_CODE)
                 binding.advertiseSwitch.isChecked = false
+                binding.advertiseSwitch.isEnabled = true
+                binding.advertiseSwitch.visibility = View.VISIBLE
 
                 var errMsg = when (errorCode) {
                     AdvertiseCallback.ADVERTISE_FAILED_ALREADY_STARTED -> getString(R.string.already_started)
@@ -78,6 +80,7 @@ class AdvertiserFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d(TAG, "onViewCreated")
         super.onViewCreated(view, savedInstanceState)
         binding.advertiseSwitch.setOnClickListener {
             val view = it as SwitchCompat
