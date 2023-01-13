@@ -17,13 +17,18 @@
 package com.example.bluetoothadvertisements
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Location
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.Looper
+import android.system.Os.bind
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -32,11 +37,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.bluetoothadvertisements.databinding.ActivityMainBinding
+import com.example.bluetoothadvertisements.databinding.ActivityMainBinding.bind
+import com.example.bluetoothadvertisements.databinding.FragmentAdvertiserBinding.bind
+import com.example.bluetoothadvertisements.databinding.FragmentScannerBinding.bind
+import com.example.bluetoothadvertisements.databinding.VhScanResultBinding.bind
 //import com.example.bluetoothadvertisements.databinding.ActivityMainBinding
 import com.google.android.gms.location.*
 import com.google.firebase.ktx.Firebase
 import com.google.android.gms.location.LocationRequest.create
 import com.google.firebase.firestore.ktx.firestore
+import java.security.MessageDigest
+import kotlin.random.Random
+
 private const val TAG = "MainActivity"
 
 /**
@@ -47,7 +59,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 private lateinit var fusedLocationClient: FusedLocationProviderClient
 private lateinit var locationCallback: LocationCallback
-
     private fun startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -68,6 +79,10 @@ private lateinit var locationCallback: LocationCallback
             locationCallback,
             Looper.getMainLooper()
         )
+    }
+    fun String.toMD5(): String {
+        val bytes = MessageDigest.getInstance("MD5").digest(this.toByteArray())
+        return bytes.joinToString(""){ "%02x".format(it) }
     }
 
     private fun checkPermissions() {
@@ -107,10 +122,7 @@ private lateinit var locationCallback: LocationCallback
         super.onCreate(savedInstanceState)
         var name = "test"
         binding = ActivityMainBinding.inflate(layoutInflater)
-        //setContentView
-
         setContentView( binding.root )
-
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         if (ActivityCompat.checkSelfPermission(
@@ -124,6 +136,7 @@ private lateinit var locationCallback: LocationCallback
             checkPermissions()
         }
         locationCallback = object : LocationCallback() {
+            @SuppressLint("MissingPermission")
             override fun onLocationResult(locationResult: LocationResult) {
                 locationResult ?: return
                 for (location in locationResult.locations){
@@ -133,22 +146,31 @@ private lateinit var locationCallback: LocationCallback
                         "time" to currTime.toString(),
                         "y" to location.latitude.toString(),
                         "x" to location.longitude.toString(),
-//                        "gps" to true
+                        "accuracy" to location.accuracy.toString(),
                     )
-//                    val name = findViewById<EditText>(R.id.editTextTextPersonName).text.toString()
+                    val sharedPref = getSharedPreferences("bluetooth",  Context.MODE_PRIVATE)
+                    if(sharedPref.getString("name", "null") == "null"){
+                        name = "DsClient:" + System.currentTimeMillis().toString() + "#" + Random.nextInt(0, 100).toString()
+                        Log.d("name", name)
+                        sharedPref.edit().putString("name", name).apply()
+                    }
+                    //get string from local storage
+                    name = sharedPref.getString("name", "null").toString()
                     val db = Firebase.firestore
-                    db.collection("Devices").document("GPS").collection(  name )
+                    db.collection("Devices").document("GPS").collection(name)
                         .document(currTime.toString()).
                         set(bluetoothInstance)
                     // get devices array from GPS document from Devices collection and add unique device name
                     // if not already in array
-                    db.collection("Devices").document("GPS").get().addOnSuccessListener { document ->
-                        if (document != null) {                            Log.d(TAG, "DocumentSnapshot data: ${document.data}")
+
+                    db.collection("Devices").document("devicesGPS").get().addOnSuccessListener { document ->
+                        if (document != null) {
+                            Log.d(TAG, "DocumentSnapshot data: ${document.data}")
 
                             val devices = document.get("devices") as ArrayList<String>
                             if (!devices.contains(name)) {
                                 devices.add(name)
-                                db.collection("Devices").document("GPS").update("devices", devices)
+                                db.collection("Devices").document("devicesGPS").update("devices", devices)
                             }
                         } else {
                             Log.d(TAG, "No such document")
@@ -168,8 +190,8 @@ private lateinit var locationCallback: LocationCallback
         }
         findViewById<Button>(R.id.button).setOnClickListener {
             val bluetoothAdapter = (getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter
-            bluetoothAdapter.name = findViewById<EditText>(R.id.editTextTextPersonName).text.toString()
-            name = findViewById<EditText>(R.id.editTextTextPersonName).text.toString()
+            val tmp= BluetoothAdapter.getDefaultAdapter().toString()
+            bluetoothAdapter.name = tmp.slice(35..tmp.length-1)
         }
     }
 
