@@ -57,8 +57,11 @@ private const val TAG = "MainActivity"
  */
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-private lateinit var fusedLocationClient: FusedLocationProviderClient
-private lateinit var locationCallback: LocationCallback
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
+
+    private var name = "wtf"
+
     private fun startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -120,9 +123,20 @@ private lateinit var locationCallback: LocationCallback
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var name = "test"
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView( binding.root )
+
+        val sharedPref = getSharedPreferences("bluetooth",  Context.MODE_PRIVATE)
+        name = sharedPref.getString("name", "null").toString()
+        if(name == "null"){
+            name = "DsClient:" + hashCode().toString()
+            Log.d("name", name)
+            sharedPref.edit().putString("name", name).apply()
+        }
+
+        val bluetoothAdapter = (getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter
+        val tmp= BluetoothAdapter.getDefaultAdapter().toString()
+        bluetoothAdapter.name = name
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         if (ActivityCompat.checkSelfPermission(
@@ -148,14 +162,7 @@ private lateinit var locationCallback: LocationCallback
                         "x" to location.longitude.toString(),
                         "accuracy" to location.accuracy.toString(),
                     )
-                    val sharedPref = getSharedPreferences("bluetooth",  Context.MODE_PRIVATE)
-                    if(sharedPref.getString("name", "null") == "null"){
-                        name = "DsClient:" + System.currentTimeMillis().toString() + "#" + Random.nextInt(0, 100).toString()
-                        Log.d("name", name)
-                        sharedPref.edit().putString("name", name).apply()
-                    }
-                    //get string from local storage
-                    name = sharedPref.getString("name", "null").toString()
+
                     val db = Firebase.firestore
                     db.collection("Devices").document("GPS").collection(name)
                         .document(currTime.toString()).
